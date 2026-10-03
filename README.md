@@ -46,3 +46,4 @@ The project requires GCC or another C11-compatible compiler and the standard C l
 
 CSE314 — Compiler Design Lab  
 Spring 2026
+
