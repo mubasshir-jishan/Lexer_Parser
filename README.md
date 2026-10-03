@@ -1,70 +1,48 @@
-/*
- * =============================================================================
- *  CSE314 — Compiler Design Lab  |  Spring 2026
- *  COMBINED LEXER + PARSER  —  Single File
- *
- *  HOW IT WORKS:
- *    1. Lexer runs first: reads input.txt -> performs DFA scan -> writes
- *       token stream to output.txt -> prints lexical analysis table
- *    2. Parser runs second: reads output.txt -> runs LL(1) table-driven
- *       parse -> prints parse trace -> prints ACCEPTED or REJECTED
- *
- *  USAGE:
- *    gcc combined.c -o combined
- *    ./combined          (reads input.txt, writes output.txt)
- *
- * =============================================================================
- *  LEXER DESIGN
- * =============================================================================
- *  Pure stream-based DFA — 120 States x 32 Input Columns
- *  No strcmp, no if/else, no switch for token recognition.
- *  All token logic lives in the dfa[][] transition table.
- *
- *  COLUMN MAP (NUM_INPUTS = 32):
- *   0=#   1=<   2=>   3=(   4=)   5=[   6=]   7=_   8=.   9=:
- *  10=/  11=digit  12=i  13=n  14=d  15=e  16=F  17=l  18==  19=+
- *  20=-  21=w  22=h  23=r  24=t  25=u  26=a  27=m  28=b  29=other-alpha
- *  30=space/tab   31=newline
- *
- *  KEY DFA FIXES APPLIED:
- *  - S0:  col13(n),col15(e),col22(h),col24(t),col25(u) now route to S39
- *         so transformFn, handleFn, updateFn, normFn, encodeFn all work
- *  - S81: col11(digit)=0 so digits inside comments are rejected (PDF Rule 2)
- *  - S83: col18(=)->S84 so '<=' correctly produces k_lte (not k_lt + k_assign)
- *  - S97-S101: each state falls back to S39 for non-mainFn letters so
- *              maxvalueFn, mergeFn, maintainFn etc. all produce k_fn
- *  - S103-S106: each state falls back to S39 for non-break letters so
- *               baseFn, buildFn, batchFn etc. all produce k_fn
- *
- * =============================================================================
- *  PARSER DESIGN
- * =============================================================================
- *  LL(1) Table-Driven Parser — Teacher Style
- *  No if/else chains for grammar logic, no switch/case, no strcmp for matching.
- *  Only strcmp used: symbol lookup in NT[] and TERMINALS[] arrays.
- *
- *  GRAMMAR (22 productions):
- *   1:  P    -> k_header FD MAIN
- *   2:  FD   -> dtype k_fn k_lparen PARAM k_rparen lparen BODY rparen FD
- *   3:  FD   -> epsilon
- *   4:  PARAM-> dtype var
- *   5:  PARAM-> epsilon
- *   6:  MAIN -> dtype k_main k_lparen k_rparen lparen BODY rparen
- *   7:  BODY -> STMT BODY
- *   8:  BODY -> epsilon
- *   9:  STMT -> dtype var k_assign EXPR k_dot
- *  10:  STMT -> k_fn k_lparen ARG k_rparen k_dot
- *  11:  STMT -> k_loop label k_colon k_while k_lparen COND k_rparen lparen BODY rparen
- *  12:  STMT -> k_return EXPR k_dot
- *  13:  STMT -> k_break k_dot
- *  14:  EXPR -> var
- *  15:  EXPR -> num
- *  16:  EXPR -> var k_op num
- *  17:  EXPR -> k_fn k_lparen ARG k_rparen
- *  18:  ARG  -> var
- *  19:  ARG  -> num
- *  20:  ARG  -> epsilon
- *  21:  COND -> dtype var k_lt num k_dot
- *  22:  COND -> dtype var k_lte num k_dot
- * =============================================================================
- */
+# CSE314 — Compiler Design Lab
+
+## Combined Lexer and LL(1) Parser
+
+This project is a single-file C implementation of a DFA-based lexical analyzer and a table-driven LL(1) parser. The program reads a source program from `input.txt`, performs lexical analysis using a DFA transition table, generates the corresponding token stream, and saves the tokens to `output.txt`. The generated token stream is then processed by the LL(1) parser for syntax analysis.
+
+## Project Description
+
+The main purpose of this project is to demonstrate the basic phases of a compiler, particularly lexical analysis and syntax analysis. The lexer scans the input source code and identifies different types of tokens such as keywords, data types, functions, variables, numbers, operators, labels, and other language-specific symbols. Comments are also handled during lexical analysis and are ignored when generating the token stream.
+
+After lexical analysis is completed, the parser reads the generated tokens from `output.txt`. It uses a stack-based LL(1) parsing algorithm along with a set of grammar productions and an LL(1) parsing table. During parsing, the program displays a trace showing the current lookahead token, stack top, whether the symbol is a terminal or non-terminal, and the action performed by the parser.
+
+## Features
+
+The project includes DFA-based lexical analysis, token generation, comment handling, variable and label recognition, function recognition, `printfFn()` argument validation, table-driven LL(1) parsing, parsing trace generation, syntax validation, and a final `ACCEPTED` or `REJECTED` result.
+
+## Project Files
+
+The main source code is stored in `combined.c`. The source program to be analyzed is provided through `input.txt`. After lexical analysis, the generated token stream is stored in `output.txt`. The project documentation is maintained in `README.md`.
+
+## Program Flow
+
+The program first reads the source code from `input.txt`. The lexer then scans the source code using the DFA transition table and generates tokens. These tokens are written to `output.txt`. The parser subsequently reads the token stream and performs LL(1) syntax analysis using the predefined grammar and parsing table. Finally, the program displays the parsing result as either `ACCEPTED` or `REJECTED`.
+
+## Grammar
+
+The parser uses 22 grammar productions covering program structure, function definitions, parameters, the main function, statements, expressions, arguments, and conditions. These productions define the syntax that an input program must follow in order to be successfully parsed.
+
+## Compilation
+
+The program can be compiled using GCC with the command `gcc combined.c -o combined`. For additional compiler warnings and C11 standard support, the command `gcc -Wall -Wextra -std=c11 combined.c -o combined` can be used.
+
+## Running the Program
+
+After compilation, place the source program that needs to be analyzed inside `input.txt`. Then run the program using `./combined`. The program will perform lexical analysis, generate `output.txt`, read the generated tokens, perform LL(1) parsing, display the parsing trace, and show the final result.
+
+## Example Input
+
+An example input program can contain a header such as `#include<stdio.h>`, function definitions, variable declarations, assignments, return statements, loops, and `printfFn()` statements according to the grammar defined in the project.
+
+## Requirements
+
+The project requires GCC or another C11-compatible compiler and the standard C library. No external libraries are required.
+
+## Author
+
+CSE314 — Compiler Design Lab  
+Spring 2026
